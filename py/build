@@ -1,0 +1,1 @@
+scp * clayton@clockpi.local:~/clockpi/py

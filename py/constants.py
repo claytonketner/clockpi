@@ -1,0 +1,5 @@
+STARTUP_WAIT = 4
+OFF = '\x00'
+ON = '\x01'
+ARRAY_WIDTH = 8*5
+NUM_LEDS = 8*8*5*2
