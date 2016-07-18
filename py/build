@@ -1,1 +1,3 @@
-scp * clayton@clockpi.local:~/clockpi/py
+rsync --exclude={venv,build} * clayton@clockpi.local:~/clockpi/py
+ssh clayton@clockpi.local 'cd ~/clockpi/py && source venv/bin/activate && pip install -r requirements.txt'
+ssh -t clayton@clockpi.local 'sudo service clockpi restart'
