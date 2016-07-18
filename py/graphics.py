@@ -46,6 +46,8 @@ def display_clock(arduino):
     while(True):
         now = datetime.datetime.now()
         hour = now.hour
+        if hour == 0:
+            hour = 12
         if hour > 12:
             hour = hour % 12
         minute = now.minute

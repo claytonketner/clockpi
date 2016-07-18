@@ -4,5 +4,4 @@ import utils
 
 
 arduino = utils.connect_to_arduino()
-graphics.benchmark(arduino)
-# graphics.display_clock(arduino)
+graphics.display_clock(arduino)
