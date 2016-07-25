@@ -7,7 +7,7 @@ DIR=~/clockpi/ar/
 all: push build refresh
 
 push:
-	rsync -rv --exclude={Makefile,} * $(TARGET):$(DIR)
+	rsync -r --exclude={Makefile,} * $(TARGET):$(DIR)
 
 build:
 	ssh -t $(TARGET) 'cd $(DIR) && ino build && sudo ino upload'

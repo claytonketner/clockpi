@@ -7,7 +7,7 @@ VENV=venv
 all: push requirements refresh
 
 push:
-	rsync -rv --exclude={$(VENV),Makefile,} * $(TARGET):$(DIR)
+	rsync -r --exclude={$(VENV),Makefile,} * $(TARGET):$(DIR)
 
 requirements:
 	ssh $(TARGET) 'cd $(DIR) && source $(VENV)/bin/activate && pip install -r requirements.txt'
