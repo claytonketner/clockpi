@@ -1,9 +1,8 @@
 import datetime
 
-import utils
 import alphanum
-from constants import OFF
-from constants import ON
+from utils import matrix_to_command
+from utils import send_data
 
 
 def generate_empty_matrix(fill_with=0):
@@ -24,24 +23,6 @@ def add_to_matrix(partial_matrix, matrix, x, y, bit_or=True):
                 or partial_matrix[yy][xx]
 
 
-def matrix_to_command(matrix):
-    command_str = ""
-    for array in range(10):
-        array_x = array % 5
-        array_y = 0
-        if array >= 5:
-            array_y = 1
-        for led_row in range(8):
-            for led_col in range(8):
-                matrix_row = 8*2 - array_y*8 - led_row - 1
-                matrix_col = array_x*8 + 8 - led_col - 1
-                if matrix[matrix_col][matrix_row]:
-                    command_str += ON
-                else:
-                    command_str += OFF
-    return command_str
-
-
 def display_clock(arduino):
     while(True):
         now = datetime.datetime.now()
@@ -57,30 +38,4 @@ def display_clock(arduino):
         add_to_matrix(alphanum.SEPARATOR, matrix, 16, 0)
         add_to_matrix(alphanum.NUMBERS[minute / 10], matrix, 24, 0)
         add_to_matrix(alphanum.NUMBERS[minute % 10], matrix, 32, 0)
-        utils.send_data(arduino, matrix_to_command(matrix))
-
-
-def benchmark(arduino):
-    start = datetime.datetime.now()
-    matrix = generate_empty_matrix(1)
-    utils.send_data(arduino, matrix_to_command(matrix))
-
-    matrix = generate_empty_matrix()
-    add_to_matrix(alphanum.ZERO, matrix, 0, 0)
-    add_to_matrix(alphanum.ONE, matrix, 8, 0)
-    add_to_matrix(alphanum.TWO, matrix, 16, 0)
-    add_to_matrix(alphanum.THREE, matrix, 24, 0)
-    add_to_matrix(alphanum.FOUR, matrix, 32, 0)
-    utils.send_data(arduino, matrix_to_command(matrix))
-
-    matrix = generate_empty_matrix()
-    add_to_matrix(alphanum.FIVE, matrix, 0, 0)
-    add_to_matrix(alphanum.SIX, matrix, 8, 0)
-    add_to_matrix(alphanum.SEVEN, matrix, 16, 0)
-    add_to_matrix(alphanum.EIGHT, matrix, 24, 0)
-    add_to_matrix(alphanum.NINE, matrix, 32, 0)
-    utils.send_data(arduino, matrix_to_command(matrix))
-    finish = datetime.datetime.now()
-    elapsed_time = finish - start
-    print "Benchmark time: {}".format(elapsed_time)
-    print "Approx time/LED: {}".format(elapsed_time/(640*3))
+        send_data(arduino, matrix_to_command(matrix))
