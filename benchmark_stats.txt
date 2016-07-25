@@ -1,3 +1,7 @@
 2016-07-13 -- No optimizations
-    Benchmark time: 0:00:30.731104
-    Approx time/LED: 0:00:00.016005
+  Benchmark time: 0:00:30.731104
+  Approx time/LED: 0:00:00.016005
+
+2016-07-25 -- Fixed #: 4
+  Benchmark time: 0:00:23.226128
+  Approx time/LED: 0:00:00.012096
