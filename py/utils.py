@@ -1,3 +1,4 @@
+import math
 import serial
 from time import sleep
 
@@ -7,7 +8,7 @@ from constants import ON
 from constants import STARTUP_WAIT
 
 
-CHUNK_SIZE = 40  # Optimal is 60 TODO
+CHUNK_SIZE = 60
 
 
 def wait_for_ping(arduino, startup=False):
@@ -45,12 +46,15 @@ def matrix_to_command(matrix):
 def send_data(arduino, data, chunk_size=CHUNK_SIZE):
     """Sends data to the arduino.
     `data` should be a 640 char string consisting of ON's and OFF's
-    `chunk_size` should evenly divide the length of `data`
     The data is sent to the arduino in chunks of size `chunk_size`
     """
     assert len(data) == NUM_LEDS
     arduino.write('sp')
     wait_for_ping(arduino)
-    for ii in xrange(len(data)/CHUNK_SIZE):
-        arduino.write(data[CHUNK_SIZE*ii:CHUNK_SIZE*(ii+1)] + 'p')
+    for ii in xrange(int(math.ceil(len(data)/float(CHUNK_SIZE)))):
+        chunk_end_index = CHUNK_SIZE*(ii+1)
+        if chunk_end_index > len(data):
+            chunk_end_index = len(data)
+        arduino.write(data[CHUNK_SIZE*ii:chunk_end_index])
+        arduino.write('p')
         wait_for_ping(arduino)
