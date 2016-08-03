@@ -1,11 +1,13 @@
 import math
 import serial
+from glob2 import glob
 from time import sleep
 
 from constants import NUM_LEDS
 from constants import OFF
 from constants import ON
 from constants import STARTUP_WAIT
+from constants import SERIAL_PORT
 
 
 CHUNK_SIZE = 60
@@ -17,8 +19,16 @@ def wait_for_ping(arduino, startup=False):
     arduino.read_until(terminator='p', size=None)
 
 
+def guess_serial_port():
+    ports = glob('/dev/ttyACM*')
+    return ports[0]
+
+
 def connect_to_arduino():
-    arduino = serial.Serial('/dev/ttyACM0', 9600)
+    serial_port = SERIAL_PORT
+    if not serial_port:
+        serial_port = guess_serial_port()
+    arduino = serial.Serial(serial_port, 9600)
     arduino.flush()
     arduino.reset_output_buffer()
     wait_for_ping(arduino, True)

@@ -1,3 +1,4 @@
+SERIAL_PORT = None
 STARTUP_WAIT = 4
 OFF = '\x00'
 ON = '\x01'
