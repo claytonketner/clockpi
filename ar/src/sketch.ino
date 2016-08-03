@@ -8,22 +8,18 @@ LedControl args:
     3rd pin arg is connected to LOAD/CS - PWM
 */
 const int num_arrays = 2;
-const int num_chips = 5;
+const int num_chips_per_array = 5;
 const int num_leds = 8 * 8 * 2 * 5;
 LedControl lc[2] = {
-    LedControl(9,11,10,num_chips),
-    LedControl(7,5,6,num_chips),
+    LedControl(9,11,10,num_chips_per_array),
+    LedControl(7,5,6,num_chips_per_array),
 };
-bool next_display[num_arrays][num_chips][8][8];
+bool next_display[num_arrays][num_chips_per_array][8][8];
 int start_byte = int('s');
 int end_byte = int('e');
 int reset_byte = int('r');
 int ping_byte = int('p');
 int led_pin = 13;
-
-// Controls
-unsigned long desired_cycle_time = 5000;  // Microseconds (1000us = 1ms)
-
 
 void initialize_displays(int brightness) {
     // Brightness 0-15
@@ -79,7 +75,7 @@ bool clean_serial() {
         static_clear();
         initialize_displays(0);
         for (int array=0; array<num_arrays; array++) {
-            for (int chip=0; chip<num_chips; chip++) {
+            for (int chip=0; chip<num_chips_per_array; chip++) {
                 for (int row=0; row<8; row++) {
                     for (int col=0; col<8; col++) {
                         next_display[array][chip][row][col] = false;
@@ -107,7 +103,7 @@ void run_serial() {
             }
             int next_byte = Serial.read();
             if (next_byte <= 1) {
-                next_display[int(byte_index / (8*8*num_chips))]
+                next_display[int(byte_index / (8*8*num_chips_per_array))]
                             [int(byte_index / (8*8)) % 5]
                             [int(byte_index / 8) % 8]
                             [byte_index % 8] = next_byte;
@@ -121,7 +117,7 @@ void run_serial() {
 
 void write_display() {
     for (int array=0; array<num_arrays; array++) {
-        for (int chip=0; chip<num_chips; chip++) {
+        for (int chip=0; chip<num_chips_per_array; chip++) {
             for (int row=0; row<8; row++) {
                 int row_state = 0;
                 for (int col=0; col<8; col++) {
@@ -138,7 +134,7 @@ void write_display() {
 }
 
 void run_test() {
-    for (int col=0; col<8*num_chips; col++) {
+    for (int col=0; col<8*num_chips_per_array; col++) {
         for (int array=0; array<num_arrays; array++) {
             lc[array].setColumn(int(col/8)%8, 7-(col%8), B11111111);
         }
@@ -151,13 +147,13 @@ void static_clear() {
     // As items (rows/columns) get cleared, they get "removed" by shifting 
     // everything in the list over by one. We then ignore the n last
     // items in avail_*, where n is the value in num_avail_*
-    int num_avail_chips = num_chips;
-    int avail_chips[num_chips];
-    int num_avail_rows[num_chips];
-    int avail_rows[num_chips][8];
-    int num_avail_pixels[num_chips][8];
-    int avail_pixels[num_chips][8][8];
-    for (int chip=0; chip<num_chips; chip++) {
+    int num_avail_chips = num_chips_per_array;
+    int avail_chips[num_chips_per_array];
+    int num_avail_rows[num_chips_per_array];
+    int avail_rows[num_chips_per_array][8];
+    int num_avail_pixels[num_chips_per_array][8];
+    int avail_pixels[num_chips_per_array][8][8];
+    for (int chip=0; chip<num_chips_per_array; chip++) {
         avail_chips[chip] = chip;
         num_avail_rows[chip] = 8;
         for (int row=0; row<8; row++) {
@@ -170,7 +166,6 @@ void static_clear() {
     }
     // Start clearing
     bool still_clearing = true;
-    unsigned long last_micros = micros();
     while (still_clearing) {
         still_clearing = false;
         int chip_index = random(num_avail_chips);
@@ -201,17 +196,10 @@ void static_clear() {
         for (int array=0; array<num_arrays; array++) {
             lc[array].setLed(chip, row, col, false);
         }
-        for (int chip=0; chip<num_chips; chip++) {
+        for (int chip=0; chip<num_chips_per_array; chip++) {
             if (num_avail_rows[chip] > 0) {
                 still_clearing = true;
             }
         }
-        unsigned long current_micros = 0;
-        unsigned long cycle_time = 0;
-        while (cycle_time < desired_cycle_time) {
-            current_micros = micros();
-            cycle_time = current_micros - last_micros;
-        }
-        last_micros = current_micros;
     }
 }
