@@ -58,7 +58,6 @@ void loop() {
 bool clean_serial() {
     // Empty serial until we find the start byte. Needing to clean serial
     // is a problem, so the LED will flash if cleaning is happening.
-
     // Returns true iff start byte was received
     bool led_state = false;
     int last_read = NULL;
@@ -119,15 +118,12 @@ void write_display() {
     for (int array=0; array<num_arrays; array++) {
         for (int chip=0; chip<num_chips_per_array; chip++) {
             for (int row=0; row<8; row++) {
-                int row_state = 0;
+                byte row_state = 0;
                 for (int col=0; col<8; col++) {
-                    // TODO could do this when we populate next_display
-                    // row_state = row_state << 1;
-                    // row_state += next_display[array][chip][row][col];
-                    bool led_state = next_display[array][chip][row][col];
-                    lc[array].setLed(chip, row, col, led_state);
+                    row_state = row_state << 1;
+                    row_state += next_display[array][chip][row][col];
                 }
-                // lc[array].setRow(chip, row, row_state);
+                lc[array].setRow(chip, row, row_state);
             }
         }
     }
