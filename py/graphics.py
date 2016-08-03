@@ -24,6 +24,7 @@ def add_to_matrix(partial_matrix, matrix, x, y, bit_or=True):
 
 
 def display_clock(arduino):
+    last_minute = -1
     while(True):
         now = datetime.datetime.now()
         hour = now.hour
@@ -32,10 +33,12 @@ def display_clock(arduino):
         if hour > 12:
             hour = hour % 12
         minute = now.minute
-        matrix = generate_empty_matrix()
-        add_to_matrix(alphanum.NUMBERS[hour / 10], matrix, 0, 0)
-        add_to_matrix(alphanum.NUMBERS[hour % 10], matrix, 8, 0)
-        add_to_matrix(alphanum.SEPARATOR, matrix, 16, 0)
-        add_to_matrix(alphanum.NUMBERS[minute / 10], matrix, 24, 0)
-        add_to_matrix(alphanum.NUMBERS[minute % 10], matrix, 32, 0)
-        send_data(arduino, matrix_to_command(matrix))
+        if last_minute != minute:
+            last_minute = minute
+            matrix = generate_empty_matrix()
+            add_to_matrix(alphanum.NUMBERS[hour / 10], matrix, 0, 0)
+            add_to_matrix(alphanum.NUMBERS[hour % 10], matrix, 8, 0)
+            add_to_matrix(alphanum.SEPARATOR, matrix, 16, 0)
+            add_to_matrix(alphanum.NUMBERS[minute / 10], matrix, 24, 0)
+            add_to_matrix(alphanum.NUMBERS[minute % 10], matrix, 32, 0)
+            send_data(arduino, matrix_to_command(matrix))
