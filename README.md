@@ -8,6 +8,7 @@ This table shows how optimizations have affected the execution speed
 | 2016-07-25 | [#4](https://github.com/claytonketner/clockpi/issues/4) | 23.2 |
 | 2016-08-02 | [#2](https://github.com/claytonketner/clockpi/issues/2) | 18.0 |
 | 2016-08-05 | [#1](https://github.com/claytonketner/clockpi/issues/1) | 4.4  |
+| 2016-08-05 | [#6](https://github.com/claytonketner/clockpi/issues/6) | 1.0  |
 
 Notes
 ==========
