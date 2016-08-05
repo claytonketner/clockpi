@@ -14,7 +14,7 @@ LedControl lc[2] = {
     LedControl(9,11,10,num_chips_per_array),
     LedControl(7,5,6,num_chips_per_array),
 };
-bool next_display[num_arrays][num_chips_per_array][8][8];
+byte next_display[num_arrays][num_chips_per_array][8];
 int start_byte = int('s');
 int end_byte = int('e');
 int reset_byte = int('r');
@@ -41,9 +41,7 @@ void setup() {
     for (int array=0; array<num_arrays; array++) {
         for (int matrix=0; matrix<lc[array].getDeviceCount(); matrix++) {
             for (int row=0; row<8; row++) {
-                for (int col=0; col<8; col++) {
-                    next_display[array][matrix][row][col] = 0;
-                }
+                next_display[array][matrix][row] = 0;
             }
         }
     }
@@ -76,9 +74,7 @@ bool clean_serial() {
         for (int array=0; array<num_arrays; array++) {
             for (int chip=0; chip<num_chips_per_array; chip++) {
                 for (int row=0; row<8; row++) {
-                    for (int col=0; col<8; col++) {
-                        next_display[array][chip][row][col] = false;
-                    }
+                    next_display[array][chip][row] = 0;
                 }
             }
         }
@@ -95,20 +91,19 @@ void run_serial() {
         if (!clean_serial()) { return; }
         int byte_index = 0;
         bool led_indicator = false;
-        while (byte_index < num_leds) {
+        while (byte_index < (num_leds / 8)) {
             while (Serial.available() == 0) {
                 digitalWrite(led_pin, led_indicator = !led_indicator);
                 delay(500);
             }
             int next_byte = Serial.read();
-            if (next_byte <= 1) {
-                next_display[int(byte_index / (8*8*num_chips_per_array))]
-                            [int(byte_index / (8*8)) % 5]
-                            [int(byte_index / 8) % 8]
+            if (next_byte == ping_byte) {
+                Serial.write('p');
+            } else {
+                next_display[int(byte_index / (8*num_chips_per_array))]
+                            [int(byte_index / 8) % num_chips_per_array]
                             [byte_index % 8] = next_byte;
                 byte_index++;
-            } else if (next_byte == ping_byte) {
-                    Serial.write('p');
             }
         }
     }
@@ -118,12 +113,7 @@ void write_display() {
     for (int array=0; array<num_arrays; array++) {
         for (int chip=0; chip<num_chips_per_array; chip++) {
             for (int row=0; row<8; row++) {
-                byte row_state = 0;
-                for (int col=0; col<8; col++) {
-                    row_state = row_state << 1;
-                    row_state += next_display[array][chip][row][col];
-                }
-                lc[array].setRow(chip, row, row_state);
+                lc[array].setRow(chip, row, next_display[array][chip][row]);
             }
         }
     }

@@ -4,8 +4,6 @@ from glob2 import glob
 from time import sleep
 
 from constants import NUM_LEDS
-from constants import OFF
-from constants import ON
 from constants import STARTUP_WAIT
 from constants import SERIAL_PORT
 
@@ -43,13 +41,13 @@ def matrix_to_command(matrix):
         if array >= 5:
             array_y = 1
         for led_row in range(8):
+            row_byte = bytearray([0])
             for led_col in range(8):
                 matrix_row = 8*2 - array_y*8 - led_row - 1
                 matrix_col = array_x*8 + 8 - led_col - 1
-                if matrix[matrix_col][matrix_row]:
-                    command_str += ON
-                else:
-                    command_str += OFF
+                row_byte[0] = row_byte[0] << 1
+                row_byte[0] += matrix[matrix_col][matrix_row]
+            command_str += row_byte
     return command_str
 
 
@@ -58,7 +56,7 @@ def send_data(arduino, data, chunk_size=CHUNK_SIZE):
     `data` should be a 640 char string consisting of ON's and OFF's
     The data is sent to the arduino in chunks of size `chunk_size`
     """
-    assert len(data) == NUM_LEDS
+    assert len(data) == (NUM_LEDS / 8)  # 8 bits in a byte
     arduino.write('sp')
     wait_for_ping(arduino)
     for ii in xrange(int(math.ceil(len(data)/float(CHUNK_SIZE)))):
