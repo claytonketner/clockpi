@@ -53,7 +53,6 @@ def matrix_to_command(matrix):
 
 def send_data(arduino, data, chunk_size=CHUNK_SIZE):
     """Sends data to the arduino.
-    `data` should be a 640 char string consisting of ON's and OFF's
     The data is sent to the arduino in chunks of size `chunk_size`
     """
     assert len(data) == (NUM_LEDS / 8)  # 8 bits in a byte
