@@ -60,3 +60,20 @@ def benchmark(arduino):
     elapsed_time = finish - start
     print "Benchmark time: {}".format(elapsed_time)
     print "Approx time/LED: {}".format(elapsed_time/(640*3))
+
+
+def cycle_time_benchmark(arduino, num_cycles=100):
+    start = datetime.datetime.now()
+    for _ in range(num_cycles/len(alphanum.NUMBERS)):
+        for number in alphanum.NUMBERS:
+            matrix = generate_empty_matrix(0)
+            add_to_matrix(number, matrix, 0, 0)
+            add_to_matrix(number, matrix, 8, 0)
+            add_to_matrix(number, matrix, 16, 0)
+            add_to_matrix(number, matrix, 24, 0)
+            add_to_matrix(number, matrix, 32, 0)
+            send_data(arduino, matrix_to_command(matrix))
+
+    finish = datetime.datetime.now()
+    elapsed_time = finish - start
+    print "Time/cycle: {}".format(elapsed_time/num_cycles)

@@ -1,3 +1,16 @@
+Performance Metric
+=======================
+```
+cd py
+make stop
+make cycle_time
+```
+A full cycle, which consists of:
+- RPi generating an array of what it wants to display
+- Transmitting the data from the RPi to the Arduino
+- The Arduino displaying the data on the LED's
+Runs in 0.378190 seconds!
+
 Benchmark Log
 ================
 This table shows how optimizations have affected the execution speed
@@ -12,6 +25,10 @@ This table shows how optimizations have affected the execution speed
 
 Notes
 ==========
+General
+--------------
+Go through the `Makefile`s and edit the variables to match your setup
+
 Arduino
 --------------
 In order to build this, you need to add the `LedControl` library to `ar/lib/`
