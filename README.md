@@ -11,7 +11,7 @@ A full cycle, which consists of:
 - Transmitting the data from the RPi to the Arduino
 - The Arduino displaying the data on the LED's
 
-Runs in 0.378190 seconds!
+Runs in 0.38 seconds!
 
 
 Benchmark Log
