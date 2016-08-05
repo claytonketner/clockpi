@@ -4,7 +4,7 @@ TARGET=clayton@clockpi.local
 DIR=~/clockpi/py/
 VENV=venv
 
-all: push requirements refresh
+all: push requirements restart
 
 push:
 	rsync -r --exclude={$(VENV),Makefile,} * $(TARGET):$(DIR)
@@ -18,7 +18,7 @@ stop:
 start:
 	ssh -t $(TARGET) 'sudo service clockpi start'
 
-refresh:
+restart:
 	ssh -t $(TARGET) 'sudo service clockpi restart'
 
 benchmark:
