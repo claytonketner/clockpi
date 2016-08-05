@@ -57,14 +57,17 @@ bool clean_serial() {
     // Empty serial until we find the start byte. Needing to clean serial
     // is a problem, so the LED will flash if cleaning is happening.
     // Returns true iff start byte was received
-    bool led_state = false;
     int last_read = NULL;
+    bool led_indicator = false;
+    unsigned long last_led_update = millis();
     while (Serial.available() > 0 &&
            last_read != start_byte &&
            last_read != reset_byte) {
         last_read = Serial.read();
-        digitalWrite(led_pin, led_state = !led_state);
-        delay(100);
+        if (millis() - last_led_update > 500) {
+            digitalWrite(led_pin, led_indicator = !led_indicator);
+            last_led_update = millis();
+        }
     }
     digitalWrite(led_pin, 0);
 
@@ -91,10 +94,15 @@ void run_serial() {
         if (!clean_serial()) { return; }
         int byte_index = 0;
         bool led_indicator = false;
+        unsigned long last_led_update = millis();
+        // Just turn off the LED here to minimize writes
+        digitalWrite(led_pin, 0);
         while (byte_index < (num_leds / 8)) {
             while (Serial.available() == 0) {
-                digitalWrite(led_pin, led_indicator = !led_indicator);
-                delay(500);
+                if (millis() - last_led_update > 500) {
+                    digitalWrite(led_pin, led_indicator = !led_indicator);
+                    last_led_update = millis();
+                }
             }
             int next_byte = Serial.read();
             if (next_byte == ping_byte) {
