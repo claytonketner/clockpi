@@ -23,6 +23,22 @@ def add_to_matrix(partial_matrix, matrix, x, y, bit_or=True):
                 or partial_matrix[yy][xx]
 
 
+def add_items_to_matrix(items, matrix, origin_x, origin_y, spacing):
+    """Adds a left-aligned 'sentence', which consists of `items`, which are
+    separated by `spacing`, which can be an integer, or a list containing
+    spacing distances between each item in `items`
+    """
+    x = origin_x
+    for ii in range(len(items)):
+        item = items[ii]
+        if ii > 0:
+            space = spacing
+            if type(space) is list:
+                space = space[ii]
+            x += space + len(items[ii-1][0])
+        add_to_matrix(item, matrix, x, origin_y)
+
+
 def display_clock(arduino):
     last_minute = -1
     while(True):
