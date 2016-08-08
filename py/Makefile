@@ -4,7 +4,7 @@ TARGET=clayton@clockpi.local
 DIR=~/clockpi/py/
 VENV=venv
 
-all: push requirements restart
+all: push restart
 
 push:
 	rsync -r --exclude={$(VENV),Makefile,} * $(TARGET):$(DIR)
