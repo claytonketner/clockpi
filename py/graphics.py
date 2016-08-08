@@ -34,7 +34,7 @@ def add_items_to_matrix(items, matrix, origin_x, origin_y, spacing):
         if ii > 0:
             space = spacing
             if type(space) is list:
-                space = space[ii]
+                space = space[ii-1]
             x += space + len(items[ii-1][0])
         add_to_matrix(item, matrix, x, origin_y)
 
