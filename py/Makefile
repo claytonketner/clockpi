@@ -12,6 +12,9 @@ push:
 requirements:
 	ssh $(TARGET) 'cd $(DIR) && source $(VENV)/bin/activate && pip install -r requirements.txt'
 
+try:
+	ssh -t $(TARGET) 'cd $(DIR) && source $(VENV)/bin/activate && python clockpi.py'
+
 stop:
 	ssh -t $(TARGET) 'sudo service clockpi stop'
 
