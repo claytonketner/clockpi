@@ -1,6 +1,7 @@
 import datetime
 
 from alphanum import numbers_large
+from alphanum import numbers_tiny
 from utils import matrix_to_command
 from utils import send_data
 
@@ -40,8 +41,7 @@ def add_items_to_matrix(items, matrix, origin_x, origin_y, spacing):
 
 
 def display_clock(arduino):
-    number_style = numbers_large
-    last_minute = -1
+    last_second = -1
     while(True):
         now = datetime.datetime.now()
         hour = now.hour
@@ -50,15 +50,23 @@ def display_clock(arduino):
         if hour > 12:
             hour = hour % 12
         minute = now.minute
-        if last_minute != minute:
-            last_minute = minute
+        second = now.second
+        if last_second != second:
+            last_second = second
             matrix = generate_empty_matrix()
-            clock_time = [
-                number_style.ALL[hour / 10],
-                number_style.ALL[hour % 10],
-                number_style.SEPARATOR,
-                number_style.ALL[minute / 10],
-                number_style.ALL[minute % 10],
+            hour_minute_display = [
+                numbers_large.ALL[hour / 10],
+                numbers_large.ALL[hour % 10],
+                numbers_large.SEPARATOR,
+                numbers_large.ALL[minute / 10],
+                numbers_large.ALL[minute % 10],
             ]
-            add_items_to_matrix(clock_time, matrix, 1, 0, 2)
+            add_items_to_matrix(
+                hour_minute_display, matrix, 1, 0, 1)
+            seconds_display = [
+                numbers_tiny.ALL[second / 10],
+                numbers_tiny.ALL[second % 10],
+            ]
+            add_items_to_matrix(
+                seconds_display, matrix, 32, 10, 1)
             send_data(arduino, matrix_to_command(matrix))
