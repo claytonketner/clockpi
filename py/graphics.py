@@ -17,11 +17,20 @@ def generate_empty_matrix(fill_with=0):
     return empty_matrix
 
 
-def add_to_matrix(partial_matrix, matrix, x, y, bit_or=True):
+def add_to_matrix(partial_matrix, matrix, x, y,
+                  bit_or=True, bit_and=False, bit_xor=False):
     for xx in range(len(partial_matrix[0])):
         for yy in range(len(partial_matrix)):
-            matrix[x+xx][y+yy] = (bit_or and matrix[x+xx][y+yy]) \
-                or partial_matrix[yy][xx]
+            if len(matrix) > (x+xx) and len(matrix[0]) > (y+yy):
+                if bit_and:
+                    matrix[x+xx][y+yy] = matrix[x+xx][y+yy] \
+                        and partial_matrix[yy][xx]
+                elif bit_xor:
+                    matrix[x+xx][y+yy] = matrix[x+xx][y+yy] \
+                        ^ partial_matrix[yy][xx]
+                else:
+                    matrix[x+xx][y+yy] = (bit_or and matrix[x+xx][y+yy]) \
+                        or partial_matrix[yy][xx]
 
 
 def add_items_to_matrix(items, matrix, origin_x, origin_y, spacing):
