@@ -56,12 +56,9 @@ def send_data(arduino, data, chunk_size=CHUNK_SIZE):
     The data is sent to the arduino in chunks of size `chunk_size`
     """
     assert len(data) == (NUM_LEDS / 8)  # 8 bits in a byte
-    arduino.write('sp')
-    wait_for_ping(arduino)
     for ii in xrange(int(math.ceil(len(data)/float(CHUNK_SIZE)))):
         chunk_end_index = CHUNK_SIZE*(ii+1)
         if chunk_end_index > len(data):
             chunk_end_index = len(data)
         arduino.write(data[CHUNK_SIZE*ii:chunk_end_index])
-        arduino.write('p')
         wait_for_ping(arduino)
