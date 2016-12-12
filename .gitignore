@@ -1,5 +1,7 @@
 *.pyc
 
+secret.py
+
 .build
 venv/
 
