@@ -17,8 +17,11 @@ LedControl lc[2] = {
 byte next_display[num_arrays][num_chips_per_array][8];
 int ping_byte = int('p');
 int led_pin = 13;
-int serial_timeout = 1000;  // #1
-int chunk_size = 60;  // #2
+
+// Serial config variables
+int serial_timeout = 150;
+int chunk_size = 60;
+
 
 void initialize_displays(int brightness) {
     // Brightness 0-15
