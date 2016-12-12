@@ -1,7 +1,8 @@
-import datetime
+from datetime import datetime
 
 from alphanum import numbers_large
 from alphanum import numbers_tiny
+from external import get_weather_temps
 from utils import matrix_to_command
 from utils import send_data
 
@@ -51,8 +52,10 @@ def add_items_to_matrix(items, matrix, origin_x, origin_y, spacing):
 
 def display_clock(arduino):
     last_second = -1
+    last_update_time = datetime.now()
+    temps = {}
     while(True):
-        now = datetime.datetime.now()
+        now = datetime.now()
         hour = now.hour
         if hour == 0:
             hour = 12
@@ -63,6 +66,7 @@ def display_clock(arduino):
         if last_second != second:
             last_second = second
             matrix = generate_empty_matrix()
+            # Hours/minutes
             hour_minute_display = [
                 numbers_large.ALL[hour / 10],
                 numbers_large.ALL[hour % 10],
@@ -70,12 +74,20 @@ def display_clock(arduino):
                 numbers_large.ALL[minute / 10],
                 numbers_large.ALL[minute % 10],
             ]
-            add_items_to_matrix(
-                hour_minute_display, matrix, 1, 0, 1)
+            add_items_to_matrix(hour_minute_display, matrix, 1, 0, 1)
+            # Seconds
             seconds_display = [
                 numbers_tiny.ALL[second / 10],
                 numbers_tiny.ALL[second % 10],
             ]
-            add_items_to_matrix(
-                seconds_display, matrix, 32, 10, 1)
+            add_items_to_matrix(seconds_display, matrix, 32, 10, 1)
+            # Weather
+            last_update_time, temps = get_weather_temps(last_update_time,
+                                                        temps)
+            if 'current_temp' in temps:
+                temp_display = [
+                    numbers_tiny.ALL[temps['current_temp'] / 10],
+                    numbers_tiny.ALL[temps['current_temp'] % 10],
+                ]
+                add_items_to_matrix(temp_display, matrix, 32, 1, 1)
             send_data(arduino, matrix_to_command(matrix))
