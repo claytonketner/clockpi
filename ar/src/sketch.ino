@@ -11,8 +11,8 @@ const int num_arrays = 2;
 const int num_chips_per_array = 5;
 const int num_leds = 8 * 8 * 2 * 5;
 LedControl lc[2] = {
-    LedControl(9,11,10,num_chips_per_array),
     LedControl(7,5,6,num_chips_per_array),
+    LedControl(9,11,10,num_chips_per_array),
 };
 byte next_display[num_arrays][num_chips_per_array][8];
 int ping_byte = int('p');
