@@ -57,42 +57,52 @@ def display_clock(arduino):
     temps = {}
     while(True):
         now = datetime.now()
+        second = now.second
+        if last_second == second:
+            # Don't update if it won't change the clockface
+            continue
+        minute = now.minute
         hour = now.hour
         if hour == 0:
             hour = 12
         if hour > 12:
             hour = hour % 12
-        minute = now.minute
-        second = now.second
-        if last_second != second:
-            last_second = second
-            matrix = generate_empty_matrix()
-            # Hours/minutes
-            hour_minute_display = [
-                numbers_large.ALL[hour / 10],
-                numbers_large.ALL[hour % 10],
-                numbers_large.SEPARATOR,
-                numbers_large.ALL[minute / 10],
-                numbers_large.ALL[minute % 10],
+        second_digits = map(int, [second / 10, second % 10])
+        minute_digits = map(int, [minute / 10, minute % 10])
+        hour_digits = map(int, [hour / 10, hour % 10])
+        last_second = second
+        matrix = generate_empty_matrix()
+        # Hours/minutes
+        hour_minute_display = [
+            numbers_large.ALL[hour_digits[0]],
+            numbers_large.ALL[hour_digits[1]],
+            numbers_large.SEPARATOR,
+            numbers_large.ALL[minute_digits[0]],
+            numbers_large.ALL[minute_digits[1]],
+        ]
+        # Drop the leading zero on the hour
+        if hour_digits[0] == 0:
+            hour_minute_display[0] = numbers_large.BLANK
+        add_items_to_matrix(hour_minute_display, matrix, 1, 0, 1)
+        # Seconds
+        seconds_display = [
+            numbers_tiny.ALL[second_digits[0]],
+            numbers_tiny.ALL[second_digits[1]],
+        ]
+        add_items_to_matrix(seconds_display, matrix, 32, 10, 1)
+        # Weather
+        last_update_time, temps = get_weather_temps(last_update_time,
+                                                    temps)
+        temp_display = []
+        if temps.get('current_temp'):
+            current_temp = temps['current_temp']
+            temp_digits = map(int, [current_temp / 10, current_temp % 10])
+            temp_display = [
+                numbers_tiny.ALL[temp_digits[0]],
+                numbers_tiny.ALL[temp_digits[1]],
             ]
-            add_items_to_matrix(hour_minute_display, matrix, 1, 0, 1)
-            # Seconds
-            seconds_display = [
-                numbers_tiny.ALL[second / 10],
-                numbers_tiny.ALL[second % 10],
-            ]
-            add_items_to_matrix(seconds_display, matrix, 32, 10, 1)
-            # Weather
-            last_update_time, temps = get_weather_temps(last_update_time,
-                                                        temps)
-            temp_display = []
-            if temps.get('current_temp'):
-                temp_display = [
-                    numbers_tiny.ALL[temps['current_temp'] / 10],
-                    numbers_tiny.ALL[temps['current_temp'] % 10],
-                ]
-            else:
-                # Communicate error
-                temp_display = [letters_tiny.E, letters_tiny.R]
-            add_items_to_matrix(temp_display, matrix, 32, 1, 1)
-            send_data(arduino, matrix_to_command(matrix))
+        else:
+            # Communicate error
+            temp_display = [letters_tiny.E, letters_tiny.R]
+        add_items_to_matrix(temp_display, matrix, 32, 1, 1)
+        send_data(arduino, matrix_to_command(matrix))
