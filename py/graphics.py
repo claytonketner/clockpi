@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from alphanum import letters_tiny
 from alphanum import numbers_large
 from alphanum import numbers_tiny
 from external import get_weather_temps
@@ -44,14 +45,14 @@ def add_items_to_matrix(items, matrix, origin_x, origin_y, spacing):
         item = items[ii]
         if ii > 0:
             space = spacing
-            if type(space) is list:
+            if hasattr(space, '__iter__'):
                 space = space[ii-1]
             x += space + len(items[ii-1][0])
         add_to_matrix(item, matrix, x, origin_y)
 
 
 def display_clock(arduino):
-    last_second = -1
+    last_second = None
     last_update_time = datetime.now()
     temps = {}
     while(True):
@@ -84,10 +85,14 @@ def display_clock(arduino):
             # Weather
             last_update_time, temps = get_weather_temps(last_update_time,
                                                         temps)
-            if 'current_temp' in temps:
+            temp_display = []
+            if temps.get('current_temp'):
                 temp_display = [
                     numbers_tiny.ALL[temps['current_temp'] / 10],
                     numbers_tiny.ALL[temps['current_temp'] % 10],
                 ]
-                add_items_to_matrix(temp_display, matrix, 32, 1, 1)
+            else:
+                # Communicate error
+                temp_display = [letters_tiny.E, letters_tiny.R]
+            add_items_to_matrix(temp_display, matrix, 32, 1, 1)
             send_data(arduino, matrix_to_command(matrix))

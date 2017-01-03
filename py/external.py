@@ -5,9 +5,6 @@ from secret import OWM_API_KEY
 from secret import OWM_CITY
 
 
-TIME_FORMAT = "%Y %m %d %H %M %S"
-
-
 def get_weather_temps(last_update_time, temps, cache_minutes=30):
     # Cache_minutes should be >= 1 due to their rate limits
     now = datetime.now()
@@ -18,14 +15,11 @@ def get_weather_temps(last_update_time, temps, cache_minutes=30):
             city = owm.weather_at_place(OWM_CITY)
             weather = city.get_weather()
             new_temps = weather.get_temperature('fahrenheit')
-            temps['low_temp'] = int(new_temps['temp_min'])
-            temps['high_temp'] = int(new_temps['temp_max'])
-            temps['current_temp'] = int(new_temps['temp'])
+            temps['low_temp'] = new_temps.get('temp_min')
+            temps['high_temp'] = new_temps.get('temp_max')
+            temps['current_temp'] = new_temps.get('temp')
         except:
-            # owm api is probably down
-            pass
-        finally:
-            # If the api call failed, the service is probably just temporarily
-            # down
+            # API is probably down
+            temps['current_temp'] = None
             last_update_time = datetime.now()
     return last_update_time, temps

@@ -47,7 +47,7 @@ void setup() {
             }
         }
     }
-    Serial.write(ping_byte); // Ready for operation
+    Serial.write(ping_byte);  // Ready for operation
 }
 
 void loop() {
