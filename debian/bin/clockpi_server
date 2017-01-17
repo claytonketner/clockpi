@@ -1,0 +1,8 @@
+#!/bin/bash
+logfile=/var/log/clockpi_server.log
+touch $logfile
+cd /home/clayton/clockpi/py
+source venv/bin/activate
+echo "Starting server..." >> $logfile
+cd /home/clayton/clockpi/py/flask
+gunicorn --bind 0.0.0.0:80 wsgi:app >>$logfile 2>&1

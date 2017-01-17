@@ -1,0 +1,7 @@
+#!/bin/bash
+logfile=/var/log/clockpi.log
+touch $logfile
+cd /home/clayton/clockpi/py
+source venv/bin/activate
+echo "Executing clockpi.py..." >> $logfile
+python clockpi.py >>$logfile 2>&1
