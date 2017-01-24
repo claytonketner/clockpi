@@ -3,9 +3,9 @@ import serial
 from glob2 import glob
 from time import sleep
 
-from constants import NUM_LEDS
-from constants import STARTUP_WAIT
-from constants import SERIAL_PORT
+from clockpi.constants import NUM_LEDS
+from clockpi.constants import STARTUP_WAIT
+from clockpi.constants import SERIAL_PORT
 
 
 CHUNK_SIZE = 60

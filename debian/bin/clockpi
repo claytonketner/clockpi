@@ -1,7 +1,8 @@
 #!/bin/bash
 logfile=/var/log/clockpi.log
 touch $logfile
-cd /home/clayton/clockpi/py
+cd /home/clayton/clockpi/py/clockpi
 source venv/bin/activate
+export PYTHONPATH=$PYTHONPATH:$PWD/clockpi
 echo "Executing clockpi.py..." >> $logfile
-python clockpi.py >>$logfile 2>&1
+python clockpi/main.py >>$logfile 2>&1

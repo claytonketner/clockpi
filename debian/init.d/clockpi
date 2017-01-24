@@ -12,6 +12,7 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="LED clock! Yay!"
 NAME=clockpi
+PROCESS_TO_KILL="python clockpi/main.py"
 DAEMON=/usr/local/bin/$NAME
 DAEMON_ARGS=""
 PIDFILE=/var/run/$NAME.pid
@@ -63,7 +64,7 @@ do_stop()
 	#   2 if daemon could not be stopped
 	#   other if a failure occurred
 	start-stop-daemon --stop --quiet --retry=TERM/5/KILL/5 --pidfile $PIDFILE --name $NAME
-	pkill -f "python clockpi.py"
+	pkill -f "$PROCESS_TO_KILL"
 	RETVAL="$?"
 	[ "$RETVAL" = 2 ] && return 2
 	# Wait for children to finish too if this is a daemon that forks

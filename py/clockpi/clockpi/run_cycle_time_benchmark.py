@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-import benchmark
-import utils
+from clockpi import benchmark
+from clockpi import utils
 
 
 arduino = utils.connect_to_arduino()

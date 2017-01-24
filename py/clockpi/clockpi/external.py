@@ -1,8 +1,8 @@
 import pyowm
 from datetime import datetime
 
-from secret import OWM_API_KEY
-from secret import OWM_CITY
+from clockpi.secret import OWM_API_KEY
+from clockpi.secret import OWM_CITY
 
 
 def get_weather_temps(last_update_time, temps, cache_minutes=30):

@@ -1,13 +1,13 @@
 import datetime
 
-from alphanum import numbers_large
-from constants import NUM_LEDS
-from constants import ON
-from graphics import add_to_matrix
-from graphics import generate_empty_matrix
-from graphics import matrix_to_command
-from utils import send_data
-from utils import wait_for_ping
+from clockpi.alphanum import numbers_large
+from clockpi.constants import NUM_LEDS
+from clockpi.constants import ON
+from clockpi.graphics.utils import add_to_matrix
+from clockpi.graphics.utils import generate_empty_matrix
+from clockpi.graphics.utils import matrix_to_command
+from clockpi.utils import send_data
+from clockpi.utils import wait_for_ping
 
 
 def test_ping(arduino, iterations):
