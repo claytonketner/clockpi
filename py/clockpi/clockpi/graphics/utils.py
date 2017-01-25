@@ -1,4 +1,9 @@
+import os
+from datetime import datetime
+
 from clockpi.external import get_weather_temps
+from clockpi.constants import TIMER_DATE_TIME_FORMAT
+from clockpi.constants import TIMER_FILE
 
 
 def generate_empty_matrix(fill_with=0):
@@ -53,4 +58,26 @@ def update_clock_info(now, clock_info):
     clock_info['weather_update_time'], clock_info['temps'] = get_weather_temps(
         clock_info.setdefault('weather_update_time', now),
         clock_info.get('temps', {}))
+    if clock_info.get('timer_end'):
+        # Check if the timer is ended - if so, clear the info out
+        if clock_info['timer_end'] < now:
+            clock_info['timer_end'] = None
+    else:
+        try:
+            timer_file = open(TIMER_FILE, 'r')
+            timer_end = timer_file.read().strip()
+            print timer_end
+            if timer_end:
+                timer_end = datetime.strptime(timer_end,
+                                              TIMER_DATE_TIME_FORMAT)
+                clock_info['timer_end'] = timer_end
+            timer_file.close()
+            try:
+                os.remove(TIMER_FILE)
+            except OSError:
+                # File doesn't exist
+                pass
+        except IOError:
+            # Can't read file
+            pass
     return True
