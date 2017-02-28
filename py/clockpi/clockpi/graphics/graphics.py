@@ -25,7 +25,6 @@ def display_clock(arduino, clock_info={}):
         diff = clock_info['timer_end'] - now
         timer_seconds = min(99 * 60 + 59, diff.seconds)
         timer_counts = (timer_seconds / 60, timer_seconds % 60)
-        print timer_counts
         timer_display = [
             numbers_large.ALL[timer_counts[0] / 10],
             numbers_large.ALL[timer_counts[0] % 10],

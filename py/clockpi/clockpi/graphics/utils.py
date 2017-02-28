@@ -33,7 +33,7 @@ def add_to_matrix(partial_matrix, matrix, x, y,
                         or partial_matrix[yy][xx]
 
 
-def add_items_to_matrix(items, matrix, origin_x, origin_y, spacing):
+def add_items_to_matrix(items, matrix, origin_x, origin_y, spacing, **kwargs):
     """Adds a left-aligned 'sentence', which consists of `items`, which are
     separated by `spacing`, which can be an integer, or a list containing
     spacing distances between each item in `items`
@@ -46,7 +46,7 @@ def add_items_to_matrix(items, matrix, origin_x, origin_y, spacing):
             if hasattr(space, '__iter__'):
                 space = space[ii-1]
             x += space + len(items[ii-1][0])
-        add_to_matrix(item, matrix, x, origin_y)
+        add_to_matrix(item, matrix, x, origin_y, **kwargs)
 
 
 def update_clock_info(now, clock_info):
