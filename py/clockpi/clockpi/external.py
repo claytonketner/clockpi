@@ -21,5 +21,5 @@ def get_weather_temps(last_update_time, temps, cache_minutes=30):
         except:
             # API is probably down
             temps['current_temp'] = None
-            last_update_time = datetime.now()
+        last_update_time = datetime.now()
     return last_update_time, temps
