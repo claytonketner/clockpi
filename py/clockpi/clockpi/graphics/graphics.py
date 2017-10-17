@@ -31,22 +31,6 @@ def display_clock(arduino, clock_info={}):
         hour = 12
     if hour > 12:
         hour = hour % 12
-    timer_display = None
-    if clock_info.get('timer_end'):
-        diff = clock_info['timer_end'] - now
-        timer_seconds = min(99 * 60 + 59, diff.seconds)
-        timer_counts = (timer_seconds / 60, timer_seconds % 60)
-        timer_display = [
-            numbers_large.ALL[timer_counts[0] / 10],
-            numbers_large.ALL[timer_counts[0] % 10],
-            numbers_large.SEPARATOR,
-            numbers_large.ALL[timer_counts[1] / 10],
-            numbers_large.ALL[timer_counts[1] % 10],
-        ]
-        if timer_counts[0] < 10:
-            timer_display[0] = numbers_large.BLANK
-        add_items_to_matrix(timer_display, matrix, 5, 0, 1, bit_xor=True)
-        return matrix
     second_digits = map(int, [second / 10, second % 10])
     minute_digits = map(int, [minute / 10, minute % 10])
     hour_digits = map(int, [hour / 10, hour % 10])

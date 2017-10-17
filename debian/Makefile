@@ -7,4 +7,4 @@ all:
 	rsync bin/* $(TARGET):/usr/local/bin/
 	rsync init.d/* $(SUDO_TARGET):/etc/init.d/
 	# TODO hardcoded
-	ssh -t $(TARGET) 'sudo update-rc.d clockpi defaults && sudo update-rc.d clockpi_server defaults'
+	ssh -t $(TARGET) 'sudo update-rc.d clockpi defaults'
