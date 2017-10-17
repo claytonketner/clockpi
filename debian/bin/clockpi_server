@@ -1,8 +1,0 @@
-#!/bin/bash
-mkdir -p /var/tmp/clockpi  # Location of timer info file
-logfile=/var/log/clockpi_server.log
-touch $logfile
-cd /home/clayton/clockpi/py/flask
-source venv/bin/activate
-echo "Starting server..." >> $logfile
-gunicorn --bind 0.0.0.0:80 wsgi:app >>$logfile 2>&1
