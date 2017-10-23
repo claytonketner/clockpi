@@ -93,7 +93,7 @@ NINE = [
     [0, 0, 1],
 ]
 
-ALL = [
+ALL_NUMBERS = (
     ZERO,
     ONE,
     TWO,
@@ -104,4 +104,6 @@ ALL = [
     SEVEN,
     EIGHT,
     NINE,
-]
+)
+
+ALL = (SEPARATOR,) + ALL_NUMBERS

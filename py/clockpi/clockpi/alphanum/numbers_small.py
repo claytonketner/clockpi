@@ -114,3 +114,18 @@ NINE = [
     [0, 0, 0, 1],
     [1, 1, 1, 0],
 ]
+
+ALL_NUMBERS = (
+    ZERO,
+    ONE,
+    TWO,
+    THREE,
+    FOUR,
+    FIVE,
+    SIX,
+    SEVEN,
+    EIGHT,
+    NINE,
+)
+
+ALL = (SEPARATOR,) + ALL_NUMBERS
