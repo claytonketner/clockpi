@@ -14,20 +14,31 @@ def generate_empty_matrix(fill_with=0):
     return empty_matrix
 
 
-def add_to_matrix(partial_matrix, matrix, x, y,
+def add_to_matrix(partial_matrix, matrix, x, y, transpose=True,
                   bit_or=True, bit_and=False, bit_xor=False):
-    for xx in range(len(partial_matrix[0])):
-        for yy in range(len(partial_matrix)):
-            if len(matrix) > (x+xx) and len(matrix[0]) > (y+yy):
-                if bit_and:
-                    matrix[x+xx][y+yy] = matrix[x+xx][y+yy] \
-                        and partial_matrix[yy][xx]
-                elif bit_xor:
-                    matrix[x+xx][y+yy] = matrix[x+xx][y+yy] \
-                        ^ partial_matrix[yy][xx]
+    if transpose:
+        partial_matrix_x_len = len(partial_matrix[0])
+        partial_matrix_y_len = len(partial_matrix)
+    else:
+        partial_matrix_x_len = len(partial_matrix)
+        partial_matrix_y_len = len(partial_matrix[0])
+    for xx in range(partial_matrix_x_len):
+        for yy in range(partial_matrix_y_len):
+            is_inside = (len(matrix) > (x+xx) and (x+xx) >= 0 and
+                         len(matrix[0]) > (y+yy) and (y+yy) >= 0)
+            if is_inside:
+                matrix_bit = matrix[x+xx][y+yy]
+                if transpose:
+                    partial_matrix_bit = partial_matrix[yy][xx]
                 else:
-                    matrix[x+xx][y+yy] = (bit_or and matrix[x+xx][y+yy]) \
-                        or partial_matrix[yy][xx]
+                    partial_matrix_bit = partial_matrix[xx][yy]
+                if bit_and:
+                    result_bit = matrix_bit and partial_matrix_bit
+                elif bit_xor:
+                    result_bit = matrix_bit ^ partial_matrix_bit
+                else:
+                    result_bit = (bit_or and matrix_bit) or partial_matrix_bit
+                matrix[x+xx][y+yy] = result_bit
 
 
 def add_items_to_matrix(items, matrix, origin_x, origin_y, spacing, **kwargs):
@@ -40,8 +51,8 @@ def add_items_to_matrix(items, matrix, origin_x, origin_y, spacing, **kwargs):
         item = items[ii]
         if ii > 0:
             space = spacing
-            if hasattr(space, '__iter__'):
-                space = space[ii-1]
+            if hasattr(spacing, '__iter__'):
+                space = spacing[ii-1]
             x += space + len(items[ii-1][0])
         add_to_matrix(item, matrix, x, origin_y, **kwargs)
 
