@@ -5,7 +5,7 @@ from clockpi.constants import NUM_LEDS
 from clockpi.constants import ON
 from clockpi.graphics.utils import add_to_matrix
 from clockpi.graphics.utils import generate_empty_matrix
-from clockpi.graphics.utils import matrix_to_command
+from clockpi.utils import matrix_to_command
 from clockpi.utils import send_data
 from clockpi.utils import wait_for_ping
 
@@ -64,8 +64,8 @@ def benchmark(arduino):
 
 def cycle_time_benchmark(arduino, num_cycles=100):
     start = datetime.datetime.now()
-    for _ in range(num_cycles/len(numbers_large.ALL)):
-        for number in numbers_large.ALL:
+    for _ in range(num_cycles/len(numbers_large.ALL_NUMBERS)):
+        for number in numbers_large.ALL_NUMBERS:
             matrix = generate_empty_matrix(0)
             add_to_matrix(number, matrix, 0, 0)
             add_to_matrix(number, matrix, 8, 0)
