@@ -3,6 +3,7 @@ import serial
 from glob2 import glob
 from time import sleep
 
+from clockpi.constants import ARRAY_HEIGHT
 from clockpi.constants import NUM_LEDS
 from clockpi.constants import STARTUP_WAIT
 from clockpi.constants import SERIAL_PORT
@@ -43,7 +44,7 @@ def matrix_to_command(matrix):
         for led_row in range(8):
             row_byte = bytearray([0])
             for led_col in range(8):
-                matrix_row = 8*2 - array_y*8 - led_row - 1
+                matrix_row = ARRAY_HEIGHT - array_y*8 - led_row - 1
                 matrix_col = array_x*8 + 8 - led_col - 1
                 row_byte[0] = row_byte[0] << 1
                 row_byte[0] += matrix[matrix_col][matrix_row]

@@ -1,3 +1,5 @@
+from clockpi.constants import ARRAY_HEIGHT
+from clockpi.constants import ARRAY_WIDTH
 from clockpi.external import get_weather_temps
 
 
@@ -7,8 +9,8 @@ def generate_empty_matrix(fill_with=0):
         my_matrix[x_coordinate][y_coordinate]
     """
     empty_matrix = []
-    for _ in xrange(8*5):
-        empty_matrix.append([fill_with]*8*2)
+    for _ in xrange(ARRAY_WIDTH):
+        empty_matrix.append([fill_with]*ARRAY_HEIGHT)
     return empty_matrix
 
 
