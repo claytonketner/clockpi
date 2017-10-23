@@ -10,20 +10,23 @@ push:
 	rsync -r --exclude={$(VENV),Makefile,} * $(TARGET):$(DIR)
 	ssh $(TARGET) 'cd $(DIR) && find clockpi -name *.pyc -delete'
 
-requirements:
+requirements: push
 	ssh $(TARGET) 'cd $(DIR) && source $(VENV)/bin/activate && pip install -r requirements.txt'
 
 stop:
-	ssh -t $(TARGET) 'sudo service clockpi stop'
+	./shmake.sh $(TARGET) stop
 
 start:
-	ssh -t $(TARGET) 'sudo service clockpi start'
+	./shmake.sh $(TARGET) start
 
 restart:
-	ssh -t $(TARGET) 'sudo service clockpi restart'
+	./shmake.sh $(TARGET) restart
 
-benchmark:
+benchmark: stop
 	ssh -t $(TARGET) 'cd $(DIR) && source $(VENV)/bin/activate && python run_benchmark.py'
 
-cycle_time:
-	ssh -t $(TARGET) 'cd $(DIR) && source $(VENV)/bin/activate && python run_cycle_time_benchmark.py'
+cycle_time: stop
+	ssh -t $(TARGET) 'cd $(DIR) && export PYTHONPATH=$$PYTHONPATH:$$PWD/clockpi && source $(VENV)/bin/activate && python run_cycle_time_benchmark.py'
+
+font_test: stop
+	ssh -t $(TARGET) 'cd $(DIR) && export PYTHONPATH=$$PYTHONPATH:$$PWD/clockpi && source $(VENV)/bin/activate && python clockpi/run_font_test.py'
