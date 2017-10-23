@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from clockpi.constants import ARRAY_HEIGHT
 from clockpi.constants import ARRAY_WIDTH
+from clockpi.external import get_traffic
 from clockpi.external import get_weather_temps
 
 
@@ -57,13 +60,45 @@ def add_items_to_matrix(items, matrix, origin_x, origin_y, spacing, **kwargs):
         add_to_matrix(item, matrix, x, origin_y, **kwargs)
 
 
-def update_clock_info(now, clock_info):
+def update_clock_info(clock_info):
+    now = datetime.now()
     second = now.second
     if clock_info.get('last_second') == second:
         # Don't update if it won't change the clockface
         return False
     clock_info['last_second'] = second
-    clock_info['weather_update_time'], clock_info['temps'] = get_weather_temps(
-        clock_info.setdefault('weather_update_time', now),
-        clock_info.get('temps', {}))
+    # Time
+    minute = now.minute
+    hour_24 = now.hour
+    hour_12 = hour_24 % 12
+    if hour_24 == 0:
+        hour_12 = 12
+    clock_info['hour_digits'] = map(int, [hour_12 / 10, hour_12 % 10])
+    clock_info['minute_digits'] = map(int, [minute / 10, minute % 10])
+    clock_info['second_digits'] = map(int, [second / 10, second % 10])
+    # Weather
+    clock_info['weather_update_time'], clock_info['weather'] = (
+        get_weather_temps(clock_info.setdefault('weather_update_time', now),
+                          clock_info.get('weather', {})))
+    if clock_info.get('weather'):
+        clock_info['temp_digits'] = map(
+            int, [clock_info['weather']['current_temp'] / 10,
+                  clock_info['weather']['current_temp'] % 10])
+        clock_info['sun_is_up'] = (clock_info['weather']['sunrise'] < now and
+                                   clock_info['weather']['sunset'] > now)
+    else:
+        # Default to False because the bright clockface is annoying at night
+        clock_info['sun_is_up'] = False
+    # Traffic
+    clock_info['traffic_update_time'], clock_info['traffic'] = get_traffic(
+        clock_info.setdefault('traffic_update_time', now),
+        clock_info.get('traffic', {}))
     return True
+
+
+def digit_to_graphic(digit_list, alphanum_source):
+    # Converts a list of numbers to a list of alphanum arrays
+    alphanum_list = []
+    for digit in digit_list:
+        alphanum_list.append(alphanum_source[digit])
+    return alphanum_list

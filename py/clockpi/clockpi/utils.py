@@ -63,3 +63,9 @@ def send_data(arduino, data, chunk_size=CHUNK_SIZE):
             chunk_end_index = len(data)
         arduino.write(data[CHUNK_SIZE*ii:chunk_end_index])
         wait_for_ping(arduino)
+
+
+def send_matrix(arduino, matrix):
+    # Helper function
+    cmd = matrix_to_command(matrix)
+    send_data(arduino, cmd)
