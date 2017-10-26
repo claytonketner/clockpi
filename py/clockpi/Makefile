@@ -22,6 +22,9 @@ start:
 restart:
 	./shmake.sh $(TARGET) restart
 
+log:
+	ssh $(TARGET) -t 'sudo tail -F -n 50 /var/log/clockpi.log'
+
 benchmark: stop
 	ssh -t $(TARGET) 'cd $(DIR) && source $(VENV)/bin/activate && python run_benchmark.py'
 

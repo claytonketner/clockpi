@@ -1,9 +1,7 @@
-from clockpi.alphanum import glyphs
-from clockpi.alphanum import letters_tiny
-from clockpi.alphanum import numbers_large
-from clockpi.alphanum import numbers_tiny
-from clockpi.graphics.utils import add_items_to_matrix
-from clockpi.graphics.utils import digit_to_graphic
+from clockpi.clockface_config import LARGE_WITH_TEMPERATURE_CONFIG
+from clockpi.clockface_config import TRAFFIC_CONFIG
+from clockpi.graphics.utils import add_to_matrix
+from clockpi.graphics.utils import config_to_matrix
 from clockpi.graphics.utils import generate_empty_matrix
 from clockpi.graphics.utils import update_clock_info
 
@@ -22,31 +20,9 @@ def display_clock(arduino, clock_info={}):
         matrix = generate_empty_matrix(1)
     else:
         matrix = generate_empty_matrix()
-    # Hours/minutes
-    hour_minute_display = digit_to_graphic(clock_info['hour_digits'],
-                                           numbers_large.ALL_NUMBERS)
-    hour_minute_display.append(numbers_large.SEPARATOR)
-    hour_minute_display.extend(digit_to_graphic(clock_info['minute_digits'],
-                                                numbers_large.ALL_NUMBERS))
-    # Drop the leading zero on the hour
-    if clock_info['hour_digits'][0] == 0:
-        hour_minute_display[0] = numbers_large.BLANK
-    add_items_to_matrix(hour_minute_display, matrix, 1, 1, 1, bit_xor=True)
-    # Seconds
-    seconds_display = digit_to_graphic(clock_info['second_digits'],
-                                       numbers_tiny.ALL_NUMBERS)
-    add_items_to_matrix(seconds_display, matrix, 32, 10, 1, bit_xor=True)
-    # Weather
-    temp_display = []
-    if clock_info.get('weather'):
-        current_temp = clock_info['weather']['current_temp']
-        if current_temp > 99 or current_temp < 0:
-            temp_display = [glyphs.SKULL]
-        else:
-            temp_display = digit_to_graphic(clock_info['temp_digits'],
-                                            numbers_tiny.ALL_NUMBERS)
+    if clock_info['show_traffic']:
+        clockface = config_to_matrix(TRAFFIC_CONFIG, clock_info)
     else:
-        # Something's wrong!
-        temp_display = [letters_tiny.E, letters_tiny.R]
-    add_items_to_matrix(temp_display, matrix, 32, 1, 1, bit_xor=True)
+        clockface = config_to_matrix(LARGE_WITH_TEMPERATURE_CONFIG, clock_info)
+    add_to_matrix(clockface, matrix, 0, 0, transpose=False, bit_xor=True)
     return matrix

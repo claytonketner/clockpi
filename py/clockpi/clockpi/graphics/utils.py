@@ -1,9 +1,12 @@
 from datetime import datetime
+from types import ModuleType
 
 from clockpi.constants import ARRAY_HEIGHT
 from clockpi.constants import ARRAY_WIDTH
 from clockpi.external import get_traffic
 from clockpi.external import get_weather_temps
+from clockpi.secret import DIRECTIONS_END_HOUR
+from clockpi.secret import DIRECTIONS_START_HOUR
 
 
 def generate_empty_matrix(fill_with=0):
@@ -76,29 +79,110 @@ def update_clock_info(clock_info):
     clock_info['hour_digits'] = map(int, [hour_12 / 10, hour_12 % 10])
     clock_info['minute_digits'] = map(int, [minute / 10, minute % 10])
     clock_info['second_digits'] = map(int, [second / 10, second % 10])
+    if hour_12 < 10:
+        clock_info['hour_digits'][0] = 'BLANK'
     # Weather
     clock_info['weather_update_time'], clock_info['weather'] = (
         get_weather_temps(clock_info.setdefault('weather_update_time', now),
                           clock_info.get('weather', {})))
     if clock_info.get('weather'):
-        clock_info['temp_digits'] = map(
-            int, [clock_info['weather']['current_temp'] / 10,
-                  clock_info['weather']['current_temp'] % 10])
+        # Temp out of range
+        if (clock_info['weather']['current_temp'] > 99 or
+                clock_info['weather']['current_temp'] < 0):
+            clock_info['temp_digits'] = ['SKULL']
+        else:
+            clock_info['temp_digits'] = map(
+                int, [clock_info['weather']['current_temp'] / 10 % 10,
+                      clock_info['weather']['current_temp'] % 10])
         clock_info['sun_is_up'] = (clock_info['weather']['sunrise'] < now and
                                    clock_info['weather']['sunset'] > now)
     else:
-        # Default to False because the bright clockface is annoying at night
+        clock_info['temp_digits'] = ['E', 'R']
+        # Default to sundown because the bright clockface is annoying at night
         clock_info['sun_is_up'] = False
     # Traffic
     clock_info['traffic_update_time'], clock_info['traffic'] = get_traffic(
         clock_info.setdefault('traffic_update_time', now),
         clock_info.get('traffic', {}))
+    if clock_info.get('traffic'):
+        clock_info['traffic_delta_digits'] = map(
+            int, [clock_info['traffic']['traffic_delta'] / 10 % 10,
+                  clock_info['traffic']['traffic_delta'] % 10])
+        clock_info['travel_time_digits'] = map(
+            int, [clock_info['traffic']['travel_time'] / 10 % 10,
+                  clock_info['traffic']['travel_time'] % 10])
+    clock_info['show_traffic'] = (clock_info.get('traffic') and hour_24 >=
+                                  DIRECTIONS_START_HOUR and hour_24 <
+                                  DIRECTIONS_END_HOUR)
+    # Special cases
+    clock_info['separator'] = ['SEPARATOR']
     return True
 
 
-def digit_to_graphic(digit_list, alphanum_source):
-    # Converts a list of numbers to a list of alphanum arrays
+def data_to_alphanums(data_list, alphanum_source):
+    """
+    Converts a list of numbers or variable names to a list of alphanum arrays
+    You can do different combinations of parameters (this is probably bad
+    practice). The items in data_list are evaluated on a per-item basis, so
+    data_list can contain both ints and strings. Not all combinations work.
+    Examples:
+        - One of the items in data_list is an int
+        - alphanum_source is a list of alphanums
+        The alphanum will be looked up by using the int from data_list as the
+        index for alphanum_source
+
+        - One of the items in data_list is an int
+        - alphanum_source is a module
+        The alphanum will be looked up by accessing the ALL_NUMBERS list in
+        the alphanum_source module
+
+        - One of the items in data_list is a str
+        - alphanum_source is a module
+        The alphanum will be looked up by using the str from data_list as the
+        name of a variable in the module
+    """
     alphanum_list = []
-    for digit in digit_list:
-        alphanum_list.append(alphanum_source[digit])
+    for item in data_list:
+        if isinstance(item, int) and isinstance(alphanum_source, list):
+            alphanum_list.append(alphanum_source[item])
+        elif isinstance(item, int) and isinstance(alphanum_source, ModuleType):
+            alphanum_list.append(alphanum_source.ALL_NUMBERS[item])
+        elif isinstance(item, str) and isinstance(alphanum_source, ModuleType):
+            alphanum_list.append(getattr(alphanum_source, item))
+        else:
+            raise NotImplementedError("No way to relate {item} to the source "
+                                      "data type given {source_type}".format(
+                                          item=item,
+                                          source_type=type(alphanum_source)))
     return alphanum_list
+
+
+def config_to_matrix(config, data):
+    """
+    Takes a configuration and data and generates a matrix using the two. There
+    is a special case where you can provide a list of fonts instead of a single
+    font. In this case, each item in the list will be tried and the first one
+    that works will be used.
+    """
+    matrix = generate_empty_matrix()
+    for group_name, group_config in config.iteritems():
+        data_name = group_config['data_name']
+        if data_name not in data:
+            print "{} not in the data given".format(data_name)
+            continue
+        group_data = data[data_name]
+        font = group_config['font']
+        if isinstance(font, list):
+            for font_choice in font:
+                try:
+                    group_display = data_to_alphanums(group_data, font_choice)
+                    break
+                except:
+                    pass
+            else:
+                raise ValueError("None of the font choices for {} "
+                                 "worked.".format(group_name))
+        else:
+            group_display = data_to_alphanums(group_data, font)
+        add_items_to_matrix(group_display, matrix, **group_config['spatial'])
+    return matrix
