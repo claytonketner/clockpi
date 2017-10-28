@@ -66,7 +66,6 @@ def get_traffic(last_update_time, traffic, cache_minutes=5):
                     dur_in_traffic - directions['duration']['value']) / 60
             else:
                 traffic['traffic_delta'] = 0
-            traffic['travel_time'] = (
-                directions['duration_in_traffic']['value'] / 60)
+            traffic['travel_time'] = dur_in_traffic / 60
         last_update_time = now
     return last_update_time, traffic
