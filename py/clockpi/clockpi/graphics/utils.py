@@ -74,7 +74,7 @@ def update_clock_info(clock_info):
     minute = now.minute
     hour_24 = now.hour
     hour_12 = hour_24 % 12
-    if hour_24 == 0:
+    if hour_24 == 0 or hour_24 == 12:
         hour_12 = 12
     clock_info['hour_digits'] = map(int, [hour_12 / 10, hour_12 % 10])
     clock_info['minute_digits'] = map(int, [minute / 10, minute % 10])
@@ -111,9 +111,11 @@ def update_clock_info(clock_info):
         clock_info['travel_time_digits'] = map(
             int, [clock_info['traffic']['travel_time'] / 10 % 10,
                   clock_info['traffic']['travel_time'] % 10])
+    # Only show traffic around the times I may be going to work
     clock_info['show_traffic'] = (clock_info.get('traffic') and hour_24 >=
                                   DIRECTIONS_START_HOUR and hour_24 <
-                                  DIRECTIONS_END_HOUR)
+                                  DIRECTIONS_END_HOUR and
+                                  now.isoweekday() <= 5)
     # Special cases
     clock_info['separator'] = ['SEPARATOR']
     return True
