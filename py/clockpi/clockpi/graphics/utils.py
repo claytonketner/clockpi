@@ -4,7 +4,7 @@ from types import ModuleType
 from clockpi.constants import ARRAY_HEIGHT
 from clockpi.constants import ARRAY_WIDTH
 from clockpi.external import get_traffic
-from clockpi.external import get_weather_temps
+from clockpi.external import get_weather
 from clockpi.secret import DIRECTIONS_END_HOUR
 from clockpi.secret import DIRECTIONS_START_HOUR
 
@@ -82,9 +82,8 @@ def update_clock_info(clock_info):
     if hour_12 < 10:
         clock_info['hour_digits'][0] = 'BLANK'
     # Weather
-    clock_info['weather_update_time'], clock_info['weather'] = (
-        get_weather_temps(clock_info.setdefault('weather_update_time', now),
-                          clock_info.get('weather', {})))
+    clock_info['weather_update_time'], clock_info['weather'] = get_weather(
+        clock_info.get('weather_update_time'), clock_info.get('weather', {}))
     if clock_info.get('weather'):
         # Temp out of range
         if (clock_info['weather']['current_temp'] > 99 or
@@ -102,8 +101,7 @@ def update_clock_info(clock_info):
         clock_info['sun_is_up'] = False
     # Traffic
     clock_info['traffic_update_time'], clock_info['traffic'] = get_traffic(
-        clock_info.setdefault('traffic_update_time', now),
-        clock_info.get('traffic', {}))
+        clock_info.get('traffic_update_time'), clock_info.get('traffic', {}))
     if clock_info.get('traffic'):
         clock_info['traffic_delta_digits'] = map(
             int, [clock_info['traffic']['traffic_delta'] / 10 % 10,

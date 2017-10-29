@@ -1,36 +1,42 @@
 import googlemaps
-import pyowm
+import requests
 from datetime import datetime
 
 from clockpi.secret import DIRECTIONS_DESTINATION
 from clockpi.secret import DIRECTIONS_ORIGIN
 from clockpi.secret import GMAPS_DIRECTIONS_API_KEY
-from clockpi.secret import OWM_API_KEY
-from clockpi.secret import OWM_CITY
+from clockpi.secret import WU_ASTRO_URL
+from clockpi.secret import WU_WEATHER_URL
 
 
-def get_weather_temps(last_update_time, weather, cache_minutes=10):
-    # Cache_minutes should be >= 1 due to their rate limits
+def get_weather(last_update_time, weather={}, cache_minutes=10):
+    """
+    Gets weather via the Weather Underground (wunderground.com) API
+    cache_minutes should be >= 6 due to WU rate limits (because we're making
+    two requests each time)
+    """
     now = datetime.now()
-    passed_minutes = (now - last_update_time).seconds/60
-    if not weather or passed_minutes >= cache_minutes:
-        new_temps = None
+    if last_update_time:
+        passed_minutes = (now - last_update_time).seconds/60
+    else:
+        passed_minutes = cache_minutes
+    if passed_minutes >= cache_minutes:
         try:
-            owm = pyowm.OWM(OWM_API_KEY)
-            city = owm.weather_at_place(OWM_CITY)
-            owm_weather = city.get_weather()
-            new_temps = owm_weather.get_temperature('fahrenheit')
-            sunrise = owm_weather.get_sunrise_time()
-            sunset = owm_weather.get_sunset_time()
+            wu_weather = requests.get(WU_WEATHER_URL).json()
+            wu_astro = requests.get(WU_ASTRO_URL).json()
+            current_temp = wu_weather['current_observation']['feelslike_f']
+            weather['current_temp'] = float(current_temp)
+            sun_info = wu_astro['sun_phase']
+            now = datetime.now()
+            weather['sunrise'] = datetime(now.year, now.month, now.day,
+                                          int(sun_info['sunrise']['hour']),
+                                          int(sun_info['sunrise']['minute']))
+            weather['sunset'] = datetime(now.year, now.month, now.day,
+                                         int(sun_info['sunset']['hour']),
+                                         int(sun_info['sunset']['minute']))
         except Exception as e:
             print e.message
             weather = {}
-        if new_temps:
-            weather['low_temp'] = new_temps.get('temp_min')
-            weather['high_temp'] = new_temps.get('temp_max')
-            weather['current_temp'] = new_temps.get('temp')
-            weather['sunrise'] = datetime.fromtimestamp(sunrise)
-            weather['sunset'] = datetime.fromtimestamp(sunset)
         last_update_time = now
     return last_update_time, weather
 
@@ -39,8 +45,11 @@ def get_traffic(last_update_time, traffic, cache_minutes=5):
     # Google maps standard API allows 2500 requests/day, which is just over
     # two per minute
     now = datetime.now()
-    passed_minutes = (now - last_update_time).seconds/60
-    if not traffic or passed_minutes >= cache_minutes:
+    if last_update_time:
+        passed_minutes = (now - last_update_time).seconds/60
+    else:
+        passed_minutes = cache_minutes
+    if passed_minutes >= cache_minutes:
         directions = None
         try:
             cl = googlemaps.Client(key=GMAPS_DIRECTIONS_API_KEY)
