@@ -33,3 +33,6 @@ cycle_time: stop push
 
 font_test: stop push
 	ssh -t $(TARGET) 'cd $(DIR) && export PYTHONPATH=$$PYTHONPATH:$$PWD/clockpi && source $(VENV)/bin/activate && python clockpi/run_font_test.py'
+
+sun_test: stop push
+	ssh -t $(TARGET) 'cd $(DIR) && export PYTHONPATH=$$PYTHONPATH:$$PWD/clockpi && source $(VENV)/bin/activate && python clockpi/run_sun_test.py'
