@@ -25,11 +25,11 @@ restart:
 log:
 	ssh $(TARGET) -t 'sudo tail -F -n 50 /var/log/clockpi.log'
 
-benchmark: stop
+benchmark: stop push
 	ssh -t $(TARGET) 'cd $(DIR) && source $(VENV)/bin/activate && python run_benchmark.py'
 
-cycle_time: stop
+cycle_time: stop push
 	ssh -t $(TARGET) 'cd $(DIR) && export PYTHONPATH=$$PYTHONPATH:$$PWD/clockpi && source $(VENV)/bin/activate && python run_cycle_time_benchmark.py'
 
-font_test: stop
+font_test: stop push
 	ssh -t $(TARGET) 'cd $(DIR) && export PYTHONPATH=$$PYTHONPATH:$$PWD/clockpi && source $(VENV)/bin/activate && python clockpi/run_font_test.py'
