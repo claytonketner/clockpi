@@ -28,6 +28,7 @@ def add_to_matrix(partial_matrix, matrix, x, y, transpose=True,
     else:
         partial_matrix_x_len = len(partial_matrix)
         partial_matrix_y_len = len(partial_matrix[0])
+    # TODO use intense math to only loop over the parts that overlap
     for xx in range(partial_matrix_x_len):
         for yy in range(partial_matrix_y_len):
             is_inside = (len(matrix) > (x+xx) and (x+xx) >= 0 and
