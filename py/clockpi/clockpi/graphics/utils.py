@@ -1,8 +1,14 @@
+import math
 from datetime import datetime
+from random import random
 from types import ModuleType
 
 from clockpi.constants import ARRAY_HEIGHT
 from clockpi.constants import ARRAY_WIDTH
+from clockpi.constants import SUN_ANIMATION_DURATION
+from clockpi.constants import SUN_ANIM_START_DIAMETER
+from clockpi.constants import SUN_ANIM_GROWTH
+from clockpi.constants import SUN_ANIM_TRAVEL
 from clockpi.external import get_traffic
 from clockpi.external import get_weather
 from clockpi.secret import DIRECTIONS_END_HOUR
@@ -28,7 +34,6 @@ def add_to_matrix(partial_matrix, matrix, x, y, transpose=True,
     else:
         partial_matrix_x_len = len(partial_matrix)
         partial_matrix_y_len = len(partial_matrix[0])
-    # TODO use intense math to only loop over the parts that overlap
     for xx in range(partial_matrix_x_len):
         for yy in range(partial_matrix_y_len):
             is_inside = (len(matrix) > (x+xx) and (x+xx) >= 0 and
@@ -64,13 +69,15 @@ def add_items_to_matrix(items, matrix, origin_x, origin_y, spacing, **kwargs):
         add_to_matrix(item, matrix, x, origin_y, **kwargs)
 
 
-def update_clock_info(clock_info):
+def update_clock_info(clock_info, update_freq):
     now = datetime.now()
     second = now.second
-    if clock_info.get('last_second') == second:
-        # Don't update if it won't change the clockface
-        return False
-    clock_info['last_second'] = second
+    last_update = clock_info.get('last_update_time')
+    if last_update:
+        update_time_delta = now - last_update
+        if update_time_delta.total_seconds() < update_freq:
+            return False
+    clock_info['last_update_time'] = now
     # Time
     minute = now.minute
     hour_24 = now.hour
@@ -96,25 +103,41 @@ def update_clock_info(clock_info):
                       clock_info['weather']['current_temp'] % 10])
         clock_info['sun_is_up'] = (clock_info['weather']['sunrise'] < now and
                                    clock_info['weather']['sunset'] > now)
+        sunrise_anim_pct = (
+            (clock_info['weather']['sunrise'] - now).total_seconds() /
+            SUN_ANIMATION_DURATION)
+        clock_info['sunrise_anim_pct'] = sunrise_anim_pct
+        clock_info['show_sunrise'] = (sunrise_anim_pct > 0 and
+                                      sunrise_anim_pct < 1)
+        sunset_anim_pct = (
+            (clock_info['weather']['sunset'] - now).total_seconds() /
+            SUN_ANIMATION_DURATION)
+        clock_info['sunset_anim_pct'] = sunset_anim_pct
+        clock_info['show_sunset'] = (sunset_anim_pct > 0 and
+                                     sunset_anim_pct < 1)
     else:
         clock_info['temp_digits'] = ['E', 'R']
         # Default to sundown because the bright clockface is annoying at night
         clock_info['sun_is_up'] = False
+        clock_info['show_sunrise'] = False
+        clock_info['show_sunset'] = False
     # Traffic
-    clock_info['traffic_update_time'], clock_info['traffic'] = get_traffic(
-        clock_info.get('traffic_update_time'), clock_info.get('traffic', {}))
-    if clock_info.get('traffic'):
-        clock_info['traffic_delta_digits'] = map(
-            int, [clock_info['traffic']['traffic_delta'] / 10 % 10,
-                  clock_info['traffic']['traffic_delta'] % 10])
-        clock_info['travel_time_digits'] = map(
-            int, [clock_info['traffic']['travel_time'] / 10 % 10,
-                  clock_info['traffic']['travel_time'] % 10])
     # Only show traffic around the times I may be going to work
     clock_info['show_traffic'] = (clock_info.get('traffic') and hour_24 >=
                                   DIRECTIONS_START_HOUR and hour_24 <
                                   DIRECTIONS_END_HOUR and
                                   now.isoweekday() <= 5)
+    if clock_info['show_traffic']:
+        clock_info['traffic_update_time'], clock_info['traffic'] = get_traffic(
+            clock_info.get('traffic_update_time'),
+            clock_info.get('traffic', {}))
+        if clock_info.get('traffic'):
+            clock_info['traffic_delta_digits'] = map(
+                int, [clock_info['traffic']['traffic_delta'] / 10 % 10,
+                      clock_info['traffic']['traffic_delta'] % 10])
+            clock_info['travel_time_digits'] = map(
+                int, [clock_info['traffic']['travel_time'] / 10 % 10,
+                      clock_info['traffic']['travel_time'] % 10])
     # Special cases
     clock_info['separator'] = ['SEPARATOR']
     return True
@@ -178,7 +201,7 @@ def config_to_matrix(config, data):
                 try:
                     group_display = data_to_alphanums(group_data, font_choice)
                     break
-                except:
+                except Exception:
                     pass
             else:
                 raise ValueError("None of the font choices for {} "
@@ -187,3 +210,53 @@ def config_to_matrix(config, data):
             group_display = data_to_alphanums(group_data, font)
         add_items_to_matrix(group_display, matrix, **group_config['spatial'])
     return matrix
+
+
+def generate_sun_matrix(center_y, radius):
+    """
+    Generates a matrix containing a horizontally centered sun. Assumes only
+    the upper half of the sun is needed.
+    """
+    radius = int(radius)
+    center_x = ARRAY_WIDTH / 2
+    matrix = generate_empty_matrix(0)
+    for ii in xrange(radius + 1):
+        if center_x - ii < 0:
+            # Off matrix
+            continue
+        x_t = math.acos(float(ii) / radius)
+        edge_y = round(math.sin(x_t) * radius)
+        for jj in xrange(int(edge_y) + 1):
+            if center_y - jj > ARRAY_HEIGHT or center_y - jj < 0:
+                # Off matrix
+                continue
+            # We only need the top hemisphere (quadrants 1 and 2)
+            add_to_matrix([[1]], matrix,
+                          int(center_x + ii + 0.5),
+                          int(center_y - jj + 0.5))
+            add_to_matrix([[1]], matrix,
+                          int(center_x - ii + 0.5),
+                          int(center_y - jj + 0.5))
+            # Add some noise to the edges
+            randomness = 0.1
+            if random() < randomness:
+                add_to_matrix([[1]], matrix,
+                              int(center_x + ii + 0.5),
+                              int(center_y - jj - 0.5))
+            if random() < randomness:
+                add_to_matrix([[1]], matrix,
+                              int(center_x - ii + 0.5),
+                              int(center_y - jj - 0.5))
+    return matrix
+
+
+def get_animated_sun(anim_pct, is_rising):
+    """
+    Given the current percent completion of the animation, returns an array
+    of the sun showing the current frame of animation.
+    """
+    sun_diameter = SUN_ANIM_START_DIAMETER + SUN_ANIM_GROWTH * anim_pct
+    if is_rising:
+        anim_pct = 1 - anim_pct
+    sun_y = sun_diameter / 2 + ARRAY_HEIGHT - SUN_ANIM_TRAVEL * anim_pct
+    return generate_sun_matrix(sun_y, sun_diameter / 2)
