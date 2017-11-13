@@ -6,7 +6,7 @@ from clockpi.graphics.utils import generate_empty_matrix
 from clockpi.graphics.utils import update_clock_info
 
 
-def display_clock(arduino, clock_info={}):
+def display_clock(clock_info={}):
     """
     N.B.: Uses the fact that the default arg for clock_info can be mutated
     permanently because it's a dictionary. Kinda sketchy...?
