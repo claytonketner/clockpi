@@ -256,8 +256,8 @@ def get_animated_sun(anim_pct, is_rising):
     Given the current percent completion of the animation, returns an array
     of the sun showing the current frame of animation.
     """
-    sun_diameter = SUN_ANIM_START_DIAMETER + SUN_ANIM_GROWTH * anim_pct
     if is_rising:
         anim_pct = 1 - anim_pct
+    sun_diameter = SUN_ANIM_START_DIAMETER + SUN_ANIM_GROWTH * anim_pct
     sun_y = sun_diameter / 2 + ARRAY_HEIGHT - SUN_ANIM_TRAVEL * anim_pct
     return generate_sun_matrix(sun_y, sun_diameter / 2)
