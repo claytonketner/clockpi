@@ -123,9 +123,8 @@ def update_clock_info(clock_info, update_freq):
         clock_info['show_sunset'] = False
     # Traffic
     # Only show traffic around the times I may be going to work
-    clock_info['show_traffic'] = (clock_info.get('traffic') and hour_24 >=
-                                  DIRECTIONS_START_HOUR and hour_24 <
-                                  DIRECTIONS_END_HOUR and
+    clock_info['show_traffic'] = (hour_24 >= DIRECTIONS_START_HOUR and
+                                  hour_24 < DIRECTIONS_END_HOUR and
                                   now.isoweekday() <= 5)
     if clock_info['show_traffic']:
         clock_info['traffic_update_time'], clock_info['traffic'] = get_traffic(
@@ -138,6 +137,8 @@ def update_clock_info(clock_info, update_freq):
             clock_info['travel_time_digits'] = map(
                 int, [clock_info['traffic']['travel_time'] / 10 % 10,
                       clock_info['traffic']['travel_time'] % 10])
+    clock_info['show_traffic'] = (clock_info['show_traffic'] and
+                                  clock_info.get('traffic'))
     # Special cases
     clock_info['separator'] = ['SEPARATOR']
     return True
